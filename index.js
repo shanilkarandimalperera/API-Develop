@@ -38,6 +38,6 @@ app.post('/handleJSON', function(req, res) {
 
 
 //Deploying the listener
-const port = 8080;
+const port = process.env.port || 0;
 app.listen(port, () => console.log(`Express server listening on port
 ${port}`));
