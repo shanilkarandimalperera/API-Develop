@@ -54,7 +54,7 @@ api.get('/', (req, res) => {
 
 
 api.get('/db', (req, res) => {
-    getCollection(dbLite, "StudentData").then(
+    getCollection(dbLite, "studentdata").then(
         value => { res.send(value); }
     ).catch(
         err => {
@@ -65,7 +65,7 @@ api.get('/db', (req, res) => {
 });
 
 api.put('/db', (req, res) => {
-    addToCollection(db, "StudentData").then(
+    addToCollection(db, "studentdata").then(
         value => { res.send("Done"); }
     ).catch(
         err => {
