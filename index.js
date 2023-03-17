@@ -1,28 +1,35 @@
-import express from 'express';
+//Dependencies
+import express from "express";
 import { initializeApp } from "firebase/app";
-import { getDocs, updateDoc } from 'firebase/firestore/lite';
 import { getFirestore, collection } from 'firebase/firestore';
 import { doc, setDoc } from "firebase/firestore";
+import { getFirestore as getFirestoreLite, collection as collectionLite, getDocs, updateDoc } from 'firebase/firestore/lite';
+
 const firebaseConfig = {
-    apiKey: "AIzaSyCGO1gtGMbicfl5GtksHDVoNz11puXFFic",
-    authDomain: "nibmtestprojectbyakila.firebaseapi.com",
-    projectId: "nibmtestprojectbyakila",
-    storageBucket: "nibmtestprojectbyakila.appspot.com",
-    messagingSenderId: "539038346774",
-    appId: "1:539038346774:web:a9e0d30347cdb8b2774f37",
-    measurementId: "G-Q0W7LDF1K5"
+    apiKey: "AIzaSyCMl9GKX9APzAeoswe5Jnkx_2muvhEDUGE",
+    authDomain: "nibmprojectipcdev.firebaseapp.com",
+    projectId: "nibmprojectipcdev",
+    storageBucket: "nibmprojectipcdev.appspot.com",
+    messagingSenderId: "75341590275",
+    appId: "1:75341590275:web:8ac291d70c7c093dc50336",
+    measurementId: "G-YP59928D4D"
 };
-const app = initializeApp(firebaseConfig);
-const database = getFirestore(app);
+
+const firebaseApp = initializeApp(firebaseConfig);
+const dbLite = getFirestoreLite(firebaseApp);
+const db = getFirestore(firebaseApp);
+const api = express();
+
 //Function to read DB
-async function getCollection(database, studentdata) {
-    const dataCol = collection(database, studentdata);
+async function getCollection(db, colName) {
+    const dataCol = collectionLite(db, colName);
     const dataSnapshot = await getDocs(dataCol);
     const DataList = dataSnapshot.docs.map(doc => doc.data());
     return DataList;
 }
+
 //Function to write to DB
-async function addToCollection(database, studentdata) {
+async function addToCollection(db, colName) {
     const data = {
         stringExample: 'Hello, World!',
         booleanExample: true,
@@ -36,16 +43,18 @@ async function addToCollection(database, studentdata) {
         }
     };
     const UUID = (new Date()).getTime();
-    await setDoc(doc(database, studentdata, UUID.toString()), data);
+    await setDoc(doc(db, colName, UUID.toString()), data);
 }
-const api = express();
+
 api.use(express.json());
 //Handling Get request for / URI
 api.get('/', (req, res) => {
     res.send('Express App Running');
 });
+
+
 api.get('/db', (req, res) => {
-    getCollection(database, "LightSensor").then(
+    getCollection(dbLite, "StudentData").then(
         value => { res.send(value); }
     ).catch(
         err => {
@@ -54,8 +63,9 @@ api.get('/db', (req, res) => {
         }
     )
 });
+
 api.put('/db', (req, res) => {
-    addToCollection(database, "LightSensor").then(
+    addToCollection(db, "StudentData").then(
         value => { res.send("Done"); }
     ).catch(
         err => {
@@ -64,6 +74,26 @@ api.put('/db', (req, res) => {
         }
     )
 });
+
+
+
+api.post('/recordTemp', (req, res) => {
+    const sensorReading = req.query.temp || 0;
+    const id = req.query.ID
+    res.send('Sensor ID : ' + id + ', Sensor reading : ' + sensorReading);
+});
+
+
+
+api.post('/handleJSON', (req, res) => {
+    const temp = req.body.temp;
+    const light = req.body.light;
+    const UID = req.body.sensorID.UID;
+    // res.send('Sensor 1 Reading : ' + temp + ', Sensor 2 reading : ' + light);  
+    res.send('UID : ' + UID);
+});
+
+
 //Deploying the listener
 const port = process.env.PORT || 8080;
 api.listen(port, () => console.log(`Express server listening on port
